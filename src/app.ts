@@ -1,5 +1,6 @@
 import express from 'express';
 import {createProxyServer} from 'http-proxy';
+import errorMiddleware from './errorMiddleware';
 import { initializeRoutes } from './routes';
 import { initializeServerList } from './serverManager';
 
@@ -15,6 +16,9 @@ const serverOne = 'https://cpsc-559-project.vercel.app';
 const serverTwo = `https://cpsc-559-project-2.vercel.app/`;
 const serverThree = `https://cpsc-559-project-dl.vercel.app/`
 initializeServerList([serverOne, serverTwo, serverThree]);
+
+console.log("Initializing middleware...");
+app.use(errorMiddleware);
 
 app.listen(PORT);
 console.log(`==== App listening on port ${PORT} ====`);
