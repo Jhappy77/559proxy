@@ -7,7 +7,7 @@ export function initializeServerList(initialUrls: string[]){
 }
 
 export function getServers(): string[] {
-    return ACTIVE_SERVERS;
+    return ACTIVE_SERVERS.map(s => s);
 }
 
 export function removeServer(serverUrl: string): boolean {

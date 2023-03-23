@@ -13,8 +13,8 @@ initializeRoutes(app);
 
 console.log("Initializing servers...");
 const serverOne = 'https://cpsc-559-project.vercel.app';
-const serverTwo = `https://cpsc-559-project-2.vercel.app/`;
-const serverThree = `https://cpsc-559-project-dl.vercel.app/`
+const serverTwo = `https://cpsc-559-project-2.vercel.app`;
+const serverThree = `https://cpsc-559-project-dl.vercel.app`
 initializeServerList([serverOne, serverTwo, serverThree]);
 
 console.log("Initializing middleware...");

@@ -1,6 +1,7 @@
 import { Express } from "express";
 import { addServer } from "./serverManager";
 import { forwardRequest } from "./forwarder";
+import axios, { isAxiosError } from "axios";
 
 export function initializeRoutes(app: Express){
     app.get('/ping', function(req, res){
@@ -28,9 +29,19 @@ export function initializeRoutes(app: Express){
         try{
             const url = req.url;
             const axiosRes = await forwardRequest(url, req);
-            console.log(`Got response! ${axiosRes.data} `)
+            if(isAxiosError(axiosRes)){
+                console.log("axiosRes is error");
+                res.status(axiosRes.response.status).send(axiosRes.response.data);
+                return;
+            }
             res.status(axiosRes.status).send(axiosRes.data);
         } catch(reason){
+            if(isAxiosError(reason)){
+                console.log("Caught reason");
+                console.log(reason);
+                res.status(reason.status).send(reason.message);
+                return;
+            }
             throw new Error(reason);
         }
     });
