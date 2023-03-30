@@ -8,6 +8,7 @@ function shouldRemoveRejected(result): boolean{
     if(isAxiosError(reason)){
         const status = reason.response.status;
         if(status && status > 499 && status < 600){
+            console.log(reason);
         console.log("Is 500 level error, rejecting");
             return true;
         }
