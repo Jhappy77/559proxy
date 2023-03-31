@@ -4,6 +4,7 @@ import { THIS_PROXY_ID } from './env';
 import { initializeRoutes } from './routes';
 import { initializeServerList } from './serverManager';
 import { initializeProxyServerList } from './proxyManager';
+import { logicalTimestampMiddleware } from './logicalTimestampMiddleware';
 
 const PORT = 3005;
 
@@ -16,7 +17,7 @@ initializeRoutes(app);
 
 console.log("Initializing proxies...");
 const proxyOne = 'https://559proxy.vercel.app';
-const proxyTwo = 'https://559proxy-2.vercel.app/';
+const proxyTwo = 'https://559proxy-2.vercel.app';
 initializeProxyServerList([proxyOne, proxyTwo]);
 
 console.log("Initializing servers...");
@@ -26,6 +27,7 @@ const serverThree = `https://cpsc-559-project-dl.vercel.app`
 initializeServerList([serverOne, serverTwo, serverThree]);
 
 console.log("Initializing middleware...");
+app.use(logicalTimestampMiddleware);
 app.use(errorMiddleware);
 
 app.listen(PORT);

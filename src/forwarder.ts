@@ -1,5 +1,5 @@
 import axios, { isAxiosError } from "axios";
-import { THIS_PROXY_ID } from "./env";
+import { THIS_PROXY_ID, THIS_URL } from "./env";
 import { findMajority } from "./findMajority";
 import { sendHandshakes } from "./handshake";
 import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
@@ -27,8 +27,8 @@ export async function forwardRequest(relativeUrl: string, req: any){
     incrementLamportTimestamp();
     const headers = {
         'lamportTimestamp': getLamportTimestamp(),
-        'senderId': THIS_PROXY_ID,
-        'tob': 1
+        'originUrl': THIS_URL,
+        'tob': 1,
     }
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
     sendHandshakes();
@@ -47,11 +47,11 @@ export async function forwardRequest(relativeUrl: string, req: any){
             responses.push(element.value); 
         } 
     });
-    if(responses.length > 3){
+    if(responses.length >= 3){
         console.log('Checking for byzantine errors');
         // Compares response data (success) or AxiosResponse data (failure)
         const toCompare = responses.map(r => r?.data ?? r.response.data);
-        // console.log(toCompare);
+        console.log(toCompare);
         // Detect Byzantine failures
         const findMajorityRes = findMajority(toCompare);
         if(findMajorityRes === true) return responses[0]; // All in agreement
@@ -64,6 +64,7 @@ export async function forwardRequest(relativeUrl: string, req: any){
         }
         const majIndex = majorityIndexSet.values().next().value;
         return responses[majIndex];
+        // return responses[0];
     }
     if(responses.length < 1){
         throw new Error('No servers worked!');
