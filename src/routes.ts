@@ -2,10 +2,11 @@ import { Express } from "express";
 import { addServer } from "./serverManager";
 import { forwardRequest } from "./forwarder";
 import axios, { isAxiosError } from "axios";
+import { handshake } from "./handshake";
 
 export function initializeRoutes(app: Express){
-    app.get('/ping', function(req, res){
-        res.send('pong');
+    app.get('/hello', function(req, res){
+        res.send('world');
     })
 
     app.post('/registerServer', function(req, res){
@@ -25,6 +26,11 @@ export function initializeRoutes(app: Express){
         throw new Error('This is an error test!');
     })
     
+    app.get('/handshake', async function(req, res){
+        handshake();
+        res.status(204).send();
+    });
+
     app.all('/*', async function(req, res){
         try{
             const url = req.url;

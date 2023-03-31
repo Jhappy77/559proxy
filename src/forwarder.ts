@@ -1,4 +1,5 @@
 import axios, { isAxiosError } from "axios";
+import { THIS_PROXY_ID } from "./env";
 import { findMajority } from "./findMajority";
 import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
 import { getServers, removeServer } from "./serverManager";
@@ -25,6 +26,8 @@ export async function forwardRequest(relativeUrl: string, req: any){
     incrementLamportTimestamp();
     const headers = {
         'lamportTimestamp': getLamportTimestamp(),
+        'senderId': THIS_PROXY_ID,
+        'tob': 1
     }
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
     const results = await Promise.allSettled(promises);
