@@ -24,11 +24,10 @@ export async function forwardRequest(relativeUrl: string, req: Request){
     const endpointUrls = servers.map(serverUrl => `${serverUrl}${relativeUrl}`);
     console.log(endpointUrls);
     incrementLamportTimestamp();
-    // // const reqHeaders = req.headers.content
-    // const ct = req.header('content-type');
-    // console.log(ct); 
+    const ct = req.header('content-type');
     const headers = {
         'lamportTimestamp': getLamportTimestamp(),
+        'Content-Type': ct,
     }
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
     const results = await Promise.allSettled(promises);
@@ -37,7 +36,6 @@ export async function forwardRequest(relativeUrl: string, req: Request){
         if(element.status === "rejected"){
             if(shouldRemoveRejected(element)){
                 const serverUrl = servers[index];
-                console.log("removin " + serverUrl + " from " + servers + " pos " + index);
                 removeServer(serverUrl);
                 return;
             }
@@ -67,5 +65,5 @@ export async function forwardRequest(relativeUrl: string, req: Request){
     if(responses.length < 1){
         throw new Error('No servers worked!');
     }
-    return responses[0];
+    return responses[0]; 
 }
