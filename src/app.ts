@@ -1,10 +1,13 @@
 import express from 'express';
 import {createProxyServer} from 'http-proxy';
 import errorMiddleware from './errorMiddleware';
+import { THIS_PROXY_ID } from './initializeId';
 import { initializeRoutes } from './routes';
 import { initializeServerList } from './serverManager';
 
 const PORT = 3005;
+
+console.log(`Initializing proxy with id ${THIS_PROXY_ID}`);
 
 const app = express();
 

@@ -42,7 +42,7 @@ export function initializeRoutes(app: Express){
                 res.status(reason.status).send(reason.message);
                 return;
             }
-            throw new Error(reason);
+            res.status(570).send('Proxy error');
         }
     });
 }

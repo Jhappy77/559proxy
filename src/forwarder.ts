@@ -1,5 +1,6 @@
 import axios, { isAxiosError } from "axios";
 import { findMajority } from "./findMajority";
+import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
 import { getServers, removeServer } from "./serverManager";
 
 function shouldRemoveRejected(result): boolean{
@@ -21,7 +22,11 @@ export async function forwardRequest(relativeUrl: string, req: any){
     const servers = getServers();
     const endpointUrls = servers.map(serverUrl => `${serverUrl}${relativeUrl}`);
     console.log(endpointUrls);
-    const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body}))
+    incrementLamportTimestamp();
+    const headers = {
+        'lamportTimestamp': getLamportTimestamp(),
+    }
+    const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
     const results = await Promise.allSettled(promises);
     const responses = [];
     results.forEach((element, index) => {
@@ -38,9 +43,13 @@ export async function forwardRequest(relativeUrl: string, req: any){
         } 
     });
     if(responses.length > 3){
+        console.log('Checking for byzantine errors');
+        // Compares response data (success) or AxiosResponse data (failure)
+        const toCompare = responses.map(r => r?.data ?? r.response.data);
+        // console.log(toCompare);
         // Detect Byzantine failures
-        const findMajorityRes = findMajority(responses);
-        if(findMajorityRes === true) return responses[0];
+        const findMajorityRes = findMajority(toCompare);
+        if(findMajorityRes === true) return responses[0]; // All in agreement
         if(findMajorityRes === false) throw new Error('No agreement');
         const majorityIndexSet = findMajorityRes;
         for(let i = 0; i<responses.length; i += 1){
