@@ -1,5 +1,6 @@
 import axios, { isAxiosError } from "axios";
 import { findMajority } from "./findMajority";
+import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
 import { getServers, removeServer } from "./serverManager";
 
 function shouldRemoveRejected(result): boolean{
@@ -20,8 +21,11 @@ function shouldRemoveRejected(result): boolean{
 export async function forwardRequest(relativeUrl: string, req: any){
     const servers = getServers();
     const endpointUrls = servers.map(serverUrl => `${serverUrl}${relativeUrl}`);
-    console.log(endpointUrls);
-    const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body}))
+    incrementLamportTimestamp();
+    const headers = {
+        'lamportTimestamp': getLamportTimestamp(),
+    }
+    const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
     const results = await Promise.allSettled(promises);
     const responses = [];
     results.forEach((element, index) => {
