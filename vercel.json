@@ -3,7 +3,7 @@
     "public": true,
     "builds": [
         {
-            "src": "src/server.ts",
+            "src": "src/app.ts",
             "use": "@vercel/node",
             "config": { "includeFiles": ["dist/**"] }
         }
@@ -19,7 +19,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "/src/server.ts"
+            "dest": "/src/app.ts"
         }
     ]
 }
