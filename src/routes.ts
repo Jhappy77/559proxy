@@ -1,8 +1,9 @@
 import { Express } from "express";
 import { addServer } from "./serverManager";
 import { forwardRequest } from "./forwarder";
-import axios, { isAxiosError } from "axios";
+import { isAxiosError } from "axios";
 import { handshake } from "./handshake";
+import { addProxyServer } from "./proxyManager";
 
 export function initializeRoutes(app: Express){
     app.get('/hello', function(req, res){
@@ -20,6 +21,19 @@ export function initializeRoutes(app: Express){
              return;
         }
         addServer(serverUrl);
+    });
+
+    app.post('/registerProxyServer', function(req, res){
+        const serverUrl = req.body?.serverUrl;
+        if(!serverUrl){
+            res.status(400).send('Bad request, no proxy server url');
+            return;
+        }
+        if(typeof(serverUrl) !== `string`){
+            res.status(400).send(`Bad request, type of serverUrl is not string`);
+             return;
+        }
+        addProxyServer(serverUrl);
     });
 
     app.get('/err', function(req, res){
