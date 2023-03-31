@@ -1,4 +1,5 @@
 import axios, { isAxiosError } from "axios";
+import { NextFunction, Request, Response } from 'express';
 import { findMajority } from "./findMajority";
 import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
 import { getServers, removeServer } from "./serverManager";
@@ -18,13 +19,15 @@ function shouldRemoveRejected(result): boolean{
     return true;
 }
 
-export async function forwardRequest(relativeUrl: string, req: any){
+export async function forwardRequest(relativeUrl: string, req: Request){
     const servers = getServers();
     const endpointUrls = servers.map(serverUrl => `${serverUrl}${relativeUrl}`);
     console.log(endpointUrls);
     incrementLamportTimestamp();
+    const ct = req.header('content-type');
     const headers = {
         'lamportTimestamp': getLamportTimestamp(),
+        'Content-Type': ct,
     }
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
     const results = await Promise.allSettled(promises);
@@ -33,7 +36,6 @@ export async function forwardRequest(relativeUrl: string, req: any){
         if(element.status === "rejected"){
             if(shouldRemoveRejected(element)){
                 const serverUrl = servers[index];
-                console.log("removin " + serverUrl + " from " + servers + " pos " + index);
                 removeServer(serverUrl);
                 return;
             }
@@ -42,11 +44,11 @@ export async function forwardRequest(relativeUrl: string, req: any){
             responses.push(element.value); 
         } 
     });
-    if(responses.length > 3){
+    if(responses.length >= 3){
         console.log('Checking for byzantine errors');
         // Compares response data (success) or AxiosResponse data (failure)
         const toCompare = responses.map(r => r?.data ?? r.response.data);
-        // console.log(toCompare);
+        console.log(toCompare);
         // Detect Byzantine failures
         const findMajorityRes = findMajority(toCompare);
         if(findMajorityRes === true) return responses[0]; // All in agreement
@@ -63,5 +65,5 @@ export async function forwardRequest(relativeUrl: string, req: any){
     if(responses.length < 1){
         throw new Error('No servers worked!');
     }
-    return responses[0];
+    return responses[0]; 
 }
