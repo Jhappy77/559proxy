@@ -1,11 +1,13 @@
 import { Express } from "express";
 import { addServer } from "./serverManager";
 import { forwardRequest } from "./forwarder";
-import axios, { isAxiosError } from "axios";
+import { isAxiosError } from "axios";
+import { handshake } from "./handshake";
+import { addProxyServer } from "./proxyManager";
 
 export function initializeRoutes(app: Express){
-    app.get('/ping', function(req, res){
-        res.send('pong');
+    app.get('/hello', function(req, res){
+        res.send('world');
     })
 
     app.post('/registerServer', function(req, res){
@@ -21,10 +23,28 @@ export function initializeRoutes(app: Express){
         addServer(serverUrl);
     });
 
+    app.post('/registerProxyServer', function(req, res){
+        const serverUrl = req.body?.serverUrl;
+        if(!serverUrl){
+            res.status(400).send('Bad request, no proxy server url');
+            return;
+        }
+        if(typeof(serverUrl) !== `string`){
+            res.status(400).send(`Bad request, type of serverUrl is not string`);
+             return;
+        }
+        addProxyServer(serverUrl);
+    });
+
     app.get('/err', function(req, res){
         throw new Error('This is an error test!');
     })
     
+    app.get('/handshake', async function(req, res){
+        handshake();
+        res.status(204).send();
+    });
+
     app.all('/*', async function(req, res){
         try{
             const url = req.url;

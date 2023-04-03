@@ -26,6 +26,7 @@ export function removeServer(serverUrl: string): boolean {
 export function addServer(serverUrl: string){
     if(ACTIVE_SERVERS.includes(serverUrl)){
         console.warn(`Warning! Tried to add server ${serverUrl} but it was already present`);
+        return;
     }
     ACTIVE_SERVERS.push(serverUrl);
     console.log("added server " + serverUrl);

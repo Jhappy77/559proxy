@@ -7,6 +7,7 @@ export const logicalTimestampMiddleware = (req: Request, res: Response, next: Ne
     const incomingTimestamp = Number(possibleReqTimestamp) ?? 0;
     const maxTimestamp = Math.max(incomingTimestamp, myTimestamp);
     myTimestamp = maxTimestamp + 1;
+    next();
 }
 
 export function getLamportTimestamp(): number {

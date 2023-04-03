@@ -1,6 +1,9 @@
 import axios, { isAxiosError } from "axios";
-import { NextFunction, Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import { THIS_URL } from "./env";
+import {  Request } from 'express';
 import { findMajority } from "./findMajority";
+import { sendHandshakes } from "./handshake";
 import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
 import { getServers, removeServer } from "./serverManager";
 
@@ -27,9 +30,13 @@ export async function forwardRequest(relativeUrl: string, req: Request){
     const ct = req.header('content-type');
     const headers = {
         'lamportTimestamp': getLamportTimestamp(),
+        'originUrl': THIS_URL,
+        'tob': 1,
+        'requestId': uuidv4(),
         'Content-Type': ct,
     }
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
+    sendHandshakes();
     const results = await Promise.allSettled(promises);
     const responses = [];
     results.forEach((element, index) => {
@@ -61,6 +68,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
         }
         const majIndex = majorityIndexSet.values().next().value;
         return responses[majIndex];
+        // return responses[0];
     }
     if(responses.length < 1){
         throw new Error('No servers worked!');
