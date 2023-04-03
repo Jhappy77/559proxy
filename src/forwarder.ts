@@ -51,7 +51,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
         console.log(toCompare);
         // Detect Byzantine failures
         const findMajorityRes = findMajority(toCompare);
-        if(findMajorityRes === true) return responses[0]; // All in agreement
+        if(findMajorityRes === true) return responses[0]; // All in agreement 
         if(findMajorityRes === false) throw new Error('No agreement');
         const majorityIndexSet = findMajorityRes;
         for(let i = 0; i<responses.length; i += 1){
@@ -66,4 +66,4 @@ export async function forwardRequest(relativeUrl: string, req: Request){
         throw new Error('No servers worked!');
     }
     return responses[0]; 
-}
+} 
