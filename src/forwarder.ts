@@ -1,5 +1,6 @@
 import axios, { isAxiosError } from "axios";
-import { THIS_PROXY_ID, THIS_URL } from "./env";
+import { THIS_URL } from "./env";
+import {  Request } from 'express';
 import { findMajority } from "./findMajority";
 import { sendHandshakes } from "./handshake";
 import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
@@ -20,15 +21,17 @@ function shouldRemoveRejected(result): boolean{
     return true;
 }
 
-export async function forwardRequest(relativeUrl: string, req: any){
+export async function forwardRequest(relativeUrl: string, req: Request){
     const servers = getServers();
     const endpointUrls = servers.map(serverUrl => `${serverUrl}${relativeUrl}`);
     console.log(endpointUrls);
     incrementLamportTimestamp();
+    const ct = req.header('content-type');
     const headers = {
         'lamportTimestamp': getLamportTimestamp(),
         'originUrl': THIS_URL,
         'tob': 1,
+        'Content-Type': ct,
     }
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
     sendHandshakes();
@@ -38,7 +41,6 @@ export async function forwardRequest(relativeUrl: string, req: any){
         if(element.status === "rejected"){
             if(shouldRemoveRejected(element)){
                 const serverUrl = servers[index];
-                console.log("removin " + serverUrl + " from " + servers + " pos " + index);
                 removeServer(serverUrl);
                 return;
             }
@@ -54,7 +56,7 @@ export async function forwardRequest(relativeUrl: string, req: any){
         console.log(toCompare);
         // Detect Byzantine failures
         const findMajorityRes = findMajority(toCompare);
-        if(findMajorityRes === true) return responses[0]; // All in agreement
+        if(findMajorityRes === true) return responses[0]; // All in agreement 
         if(findMajorityRes === false) throw new Error('No agreement');
         const majorityIndexSet = findMajorityRes;
         for(let i = 0; i<responses.length; i += 1){
@@ -69,5 +71,5 @@ export async function forwardRequest(relativeUrl: string, req: any){
     if(responses.length < 1){
         throw new Error('No servers worked!');
     }
-    return responses[0];
-}
+    return responses[0]; 
+} 

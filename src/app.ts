@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser';
 import express from 'express';
 import errorMiddleware from './errorMiddleware';
 import { THIS_PROXY_ID } from './env';
@@ -12,6 +13,13 @@ console.log(`Initializing proxy with id ${THIS_PROXY_ID}`);
 
 const app = express();
 
+console.log("Initializing middleware...");
+app.use(errorMiddleware);
+// Body parser middleware
+app.use(bodyParser.json());
+app.use(logicalTimestampMiddleware);
+app.use(errorMiddleware);
+
 console.log("Initializing routes...");
 initializeRoutes(app);
 
@@ -25,10 +33,6 @@ const serverOne = 'https://cpsc-559-project.vercel.app';
 const serverTwo = `https://cpsc-559-project-2.vercel.app`;
 const serverThree = `https://cpsc-559-project-dl.vercel.app`
 initializeServerList([serverOne, serverTwo, serverThree]);
-
-console.log("Initializing middleware...");
-app.use(logicalTimestampMiddleware);
-app.use(errorMiddleware);
 
 app.listen(PORT);
 console.log(`==== App listening on port ${PORT} ====`);
