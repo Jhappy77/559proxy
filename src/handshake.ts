@@ -1,5 +1,5 @@
 import axios from "axios";
-import { THIS_PROXY_ID } from "./env";
+import { THIS_PROXY_ID, THIS_URL } from "./env";
 import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
 import { getProxyServers, removeProxyServer } from "./proxyManager";
 import { getServers, removeServer } from "./serverManager";
@@ -33,6 +33,7 @@ export async function sendHandshakes(){
     const headers = {
         'lamportTimestamp': getLamportTimestamp(),
         'senderId': THIS_PROXY_ID,
+        'originUrl': THIS_URL,
     }
     const promises = handshakeUrls.map(url => axios.get(url, {headers}));
     const results = await Promise.allSettled(promises);
