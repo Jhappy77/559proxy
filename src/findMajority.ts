@@ -21,10 +21,10 @@ export function findMajority(objArray: any[]): boolean | Set<number> {
     let majorityKey;
     const majority = objArray.length / 2;
     for(const key of map.keys()){
-        if(map.get(key).length > majority){
+        if(map.get(key).length > majority){ 
             majorityKey = key;
-        }
-    }
+        } 
+    } 
     if(majorityKey === undefined) return false;
     return new Set<number>(map.get(majorityKey));
   }

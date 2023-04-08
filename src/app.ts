@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser';
 import express from 'express';
+import cors from 'cors';
 import errorMiddleware from './errorMiddleware';
 import { THIS_PROXY_ID } from './env';
 import { initializeRoutes } from './routes';
@@ -19,6 +20,7 @@ app.use(errorMiddleware);
 app.use(bodyParser.json());
 app.use(logicalTimestampMiddleware);
 app.use(errorMiddleware);
+app.use(cors({ origin: true }));
 
 console.log("Initializing routes...");
 initializeRoutes(app);
