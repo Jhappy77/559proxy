@@ -6,6 +6,7 @@ import { findMajority } from "./findMajority";
 import { sendHandshakes } from "./handshake";
 import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
 import { getServers, removeServer } from "./serverManager";
+import { resyncBadServers } from "./resyncBadServers";
 
 function shouldRemoveRejected(result): boolean{
     console.log(`Failed for ${result.reason}`);
@@ -56,19 +57,21 @@ export async function forwardRequest(relativeUrl: string, req: Request){
         // Compares response data (success) or AxiosResponse data (failure)
         const toCompare = responses.map(r => r?.data ?? r.response.data);
         console.log(toCompare);
-        // Detect Byzantine failures
         const findMajorityRes = findMajority(toCompare);
         if(findMajorityRes === true) return responses[0]; // All in agreement 
         if(findMajorityRes === false) throw new Error('No agreement');
+
         const majorityIndexSet = findMajorityRes;
-        for(let i = 0; i<responses.length; i += 1){
-            if(!majorityIndexSet.has(i)){
-                removeServer(servers[i]);
-            }
-        }
+        const allIndexes = new Set(Array(servers.length).keys());
+        const faultyIndexes = new Set([...allIndexes].filter(x => !majorityIndexSet.has(x)));
+        const goodServers = Array.from(majorityIndexSet).map(i => servers[i]);
+        const badServers = Array.from(faultyIndexes).map(i => servers[i]);
+        console.log(goodServers);
+        console.log(badServers);
+        resyncBadServers(goodServers, badServers);
+
         const majIndex = majorityIndexSet.values().next().value;
         return responses[majIndex];
-        // return responses[0];
     }
     if(responses.length < 1){
         throw new Error('No servers worked!');

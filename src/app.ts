@@ -31,9 +31,9 @@ const proxyTwo = 'https://559proxy-2.vercel.app';
 initializeProxyServerList([proxyOne, proxyTwo]);
 
 console.log("Initializing servers...");
-const serverOne = 'https://cpsc-559-project.vercel.app';
-const serverTwo = `https://cpsc-559-project-2.vercel.app`;
-const serverThree = `https://cpsc-559-project-dl.vercel.app`
+const serverOne = 'https://appserver559-3.herokuapp.com';
+const serverTwo = `https://appserver559-2.herokuapp.com`;
+const serverThree = `https://appserver559-1.herokuapp.com`
 initializeServerList([serverOne, serverTwo, serverThree]);
 
 app.listen(PORT);
