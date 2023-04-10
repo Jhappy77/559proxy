@@ -64,6 +64,7 @@ export function initializeRoutes(app: Express){
             }
             res.status(axiosRes.status).send(axiosRes.data);
         } catch(reason){
+            console.error(reason);
             if(isAxiosError(reason)){
                 console.log("Caught reason");
                 console.log(reason);
