@@ -7,6 +7,7 @@ import { sendHandshakes } from "./handshake";
 import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
 import { getServers, removeServer } from "./serverManager";
 import { resyncBadServers } from "./resyncBadServers";
+import { handleRejections } from "./handleRejections";
 
 function shouldRemoveRejected(result): boolean{
     console.log(`Failed for ${result.reason}`);
@@ -38,13 +39,15 @@ export async function forwardRequest(relativeUrl: string, req: Request){
     }
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
     sendHandshakes();
+
     const results = await Promise.allSettled(promises);
     const responses = [];
+    const rejectedServers = [];
     results.forEach((element, index) => {
         if(element.status === "rejected"){
             if(shouldRemoveRejected(element)){
                 const serverUrl = servers[index];
-                removeServer(serverUrl);
+                rejectedServers.push(serverUrl);
                 return;
             }
             responses.push(element.reason);
@@ -52,6 +55,8 @@ export async function forwardRequest(relativeUrl: string, req: Request){
             responses.push(element.value); 
         } 
     });
+    handleRejections(servers, rejectedServers);
+    
     if(responses.length >= 3){
         console.log('Checking for byzantine errors');
         // Compares response data (success) or AxiosResponse data (failure)

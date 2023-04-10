@@ -1,9 +1,10 @@
 import { Express } from "express";
-import { addServer } from "./serverManager";
+import { addServer, initializeServerList } from "./serverManager";
 import { forwardRequest } from "./forwarder";
 import { isAxiosError } from "axios";
 import { handshake } from "./handshake";
-import { addProxyServer } from "./proxyManager";
+import { addProxyServer, initializeProxyServerList } from "./proxyManager";
+import { initialProxyList, initialServerList } from "./initialValues";
 
 export function initializeRoutes(app: Express){
     app.get('/hello', function(req, res){
@@ -34,6 +35,13 @@ export function initializeRoutes(app: Express){
              return;
         }
         addProxyServer(serverUrl);
+    });
+
+    app.get('/resetToDefaults', function(req,res){
+        // For debug purposes
+        initializeProxyServerList(initialProxyList);
+        initializeServerList(initialServerList);
+        res.status(200).send('Reset to defaults');
     });
 
     app.get('/err', function(req, res){

@@ -1,6 +1,9 @@
 const ACTIVE_SERVERS = [];
 
 export function initializeServerList(initialUrls: string[]){
+    for (let i=0; i < ACTIVE_SERVERS.length; i += 1){
+        ACTIVE_SERVERS.pop();
+    }
     initialUrls.forEach(url => {
         addServer(url);
     })

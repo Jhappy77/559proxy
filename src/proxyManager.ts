@@ -3,6 +3,9 @@ import { THIS_URL } from "./env";
 const ACTIVE_PROXIES = [];
 
 export function initializeProxyServerList(initialUrls: string[]){
+    for (let i=0; i < ACTIVE_PROXIES.length; i += 1){
+        ACTIVE_PROXIES.pop();
+    }
     initialUrls.forEach(url => {
         addProxyServer(url);
     })
