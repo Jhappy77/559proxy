@@ -64,10 +64,11 @@ export function initializeRoutes(app: Express){
             }
             res.status(axiosRes.status).send(axiosRes.data);
         } catch(reason){
-            console.error(reason);
+            // console.error(reason);
             if(isAxiosError(reason)){
                 console.log("Caught reason");
-                console.log(reason);
+                console.log(reason.message);
+                // console.log(reason);
                 res.status(reason.status).send(reason.message);
                 return;
             }
