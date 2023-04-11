@@ -6,6 +6,7 @@ import { handshake } from "./handshake";
 import { addProxyServer, initializeProxyServerList } from "./proxyManager";
 import { initialProxyList, initialServerList } from "./initialValues";
 import { resetTobs } from "./resetTobs";
+import { getLamportTimestamp } from "./logicalTimestampMiddleware";
 
 export function initializeRoutes(app: Express){
     app.get('/hello', function(req, res){
@@ -57,7 +58,7 @@ export function initializeRoutes(app: Express){
     
     app.get('/handshake', async function(req, res){
         handshake();
-        res.status(204).send();
+        res.status(204).setHeader('lamportTimestamp', getLamportTimestamp()).send();
     });
 
     app.all('/*', async function(req, res){

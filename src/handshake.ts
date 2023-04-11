@@ -1,6 +1,6 @@
 import axios from "axios";
 import { THIS_PROXY_ID, THIS_URL } from "./env";
-import { getLamportTimestamp, incrementLamportTimestamp } from "./logicalTimestampMiddleware";
+import { getLamportTimestamp, incrementLamportTimestamp, onRecieveTimestamp } from "./logicalTimestampMiddleware";
 import { getProxyServers, removeProxyServer } from "./proxyManager";
 import { getServers, removeServer } from "./serverManager";
 
@@ -15,7 +15,7 @@ export async function handshake(){
         'originUrl': THIS_URL,
         'senderId': THIS_PROXY_ID,
     }
-    console.log(`pinging app servers with ${headers}`)
+    console.log(`pinging app servers with t=${headers.lamportTimestamp}`)
     const promises = endpointUrls.map(url => axios.get(url, {headers}));
     const results = await Promise.allSettled(promises);
     results.forEach((element, index) => {
@@ -46,6 +46,10 @@ export async function sendHandshakes(){
             console.error(element.reason);
             removeProxyServer(proxyUrl);
             return;
+        } else {
+            console.log(`Heard back from handshake, updating ts: ` + element.value?.headers?.lamportTimestamp);
+            const incoming = Number(element.value?.headers?.lamportTimestamp);
+            onRecieveTimestamp(incoming);
         } 
     });
 }
