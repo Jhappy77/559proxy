@@ -13,6 +13,7 @@ export function initializeRoutes(app: Express){
         res.send('world');
     })
 
+    // for adding new app servers
     app.post('/registerServer', function(req, res){
         const serverUrl = req.body?.serverUrl;
         if(!serverUrl){
@@ -26,6 +27,7 @@ export function initializeRoutes(app: Express){
         addServer(serverUrl);
     });
 
+    // For adding new proxy servers
     app.post('/registerProxyServer', function(req, res){
         const serverUrl = req.body?.serverUrl;
         if(!serverUrl){
@@ -47,6 +49,7 @@ export function initializeRoutes(app: Express){
         res.status(200).send('Reset to defaults');
     });
 
+    // Also for debug purposes
     app.get('/resetConnectedTobs', function(req,res){
         resetTobs().catch(e => console.error(`Error resetting TOBs: ${e}`));
         res.status(200).send('Reset TOBs');
@@ -56,11 +59,15 @@ export function initializeRoutes(app: Express){
         throw new Error('This is an error test!');
     })
     
+    // When you recieve a handshake from another proxy, you ping every app server with your 
+    // current timestamp (for TOB logic)
     app.get('/handshake', async function(req, res){
         handshake();
         res.status(204).setHeader('lamportTimestamp', getLamportTimestamp()).send();
     });
 
+    // Handles all requests which are not matches for the above
+    // Forward them to all app servers, and handles errors
     app.all('/*', async function(req, res){
         try{
             const url = req.url;

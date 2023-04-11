@@ -9,6 +9,7 @@ import { getServers, removeServer } from "./serverManager";
 import { resyncBadServers } from "./resyncBadServers";
 import { handleRejections } from "./handleRejections";
 
+// Decides if a response warrants rejecting the server or if it is a part of normal app flow
 function shouldRemoveRejected(result, serverUrl: string): boolean{
     console.log(`AppServer ${serverUrl} failed because ${result.reason}`);
     const {reason} = result;
@@ -24,6 +25,9 @@ function shouldRemoveRejected(result, serverUrl: string): boolean{
     return true;
 }
 
+// Forwards request to all app server using same info client gave us
+// Additionally, tells other proxies to handshake.
+// Handles errors, and compares results if applicable.
 export async function forwardRequest(relativeUrl: string, req: Request){
     const servers = getServers();
     const endpointUrls = servers.map(serverUrl => `${serverUrl}${relativeUrl}`);
@@ -43,6 +47,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers, timeout: 3000}))
     sendHandshakes().catch(e => {console.log("Error sending handshakes")});
 
+    // Get results from every server, decide if they're good or bad
     const results = await Promise.allSettled(promises);
     const responses = [];
     const rejectedServers = [];
@@ -60,6 +65,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
     });
     handleRejections(servers, rejectedServers).catch(e => {console.log("error handling rejections")});
     
+    // The following block of code is for value comparison (detect Byzantine/value errors)
     if(responses.length >= 3){
         console.log('Checking for byzantine errors');
         // Compares response data (success) or AxiosResponse data (failure) or reason (all else failed)
@@ -69,6 +75,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
         if(findMajorityRes === true) return responses[0]; // All in agreement 
         if(findMajorityRes === false) throw new Error('No agreement');
 
+        // Find who is in majority, deal with minority appropriately 
         const majorityIndexSet = findMajorityRes;
         const allIndexes = new Set(Array(servers.length).keys());
         const faultyIndexes = new Set([...allIndexes].filter(x => !majorityIndexSet.has(x)));

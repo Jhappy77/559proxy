@@ -2,6 +2,9 @@ import axios from "axios";
 import { resyncBadServers } from "./resyncBadServers";
 import { removeServer } from "./serverManager";
 
+// If every request was rejected, try pinging every server again.
+// If they all return 200, then they were probably fine, so restore them
+// This helps prevent catastrophes where a weird error causes everything to go down
 async function recoverFromAllRejected(serverUrls: string[]){
     console.log('Recovering from all servers being rejected');
     const promises = serverUrls.map(url => axios.get(`${url}/ping`, {timeout: 1500}));
@@ -15,6 +18,10 @@ async function recoverFromAllRejected(serverUrls: string[]){
     });
 }
 
+
+// How to handle servers which rejected our request?
+// If just some rejected, try to revive them by syncing them with good servers
+// If all were rejected, see if they are actually okay behind the scenes
 export async function handleRejections(allServers: string[], badServers: string[]){
     if(badServers.length === 0) return;
     console.log("Handling rejections");

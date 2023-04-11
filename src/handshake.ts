@@ -27,7 +27,7 @@ export async function handshake(){
     });
 }
 
-// Send handshakes to other proxies (tell them to ping all servers)
+// Send handshakes to other proxies (tell them to ping all servers - execute above fn)
 export async function sendHandshakes(){
     const proxies = getProxyServers();
     const handshakeUrls = proxies.map(proxyUrl => `${proxyUrl}/handshake`);

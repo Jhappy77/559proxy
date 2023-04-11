@@ -5,6 +5,9 @@ import { getServers } from "./serverManager";
 
 const ACTIVE_PROXIES = [];
 
+// If we know one of the proxies has failed, we tell all the app servers about it
+// That way they can get rid of its url from their TOB timestamp detector
+// This prevents TOB hangs
 async function notifyServersOfFailedProxy(proxyUrl: string){
     const servers = getServers();
     const endpointUrls = servers.map(serverUrl => `${serverUrl}/removeProxy`);
@@ -37,6 +40,7 @@ export function getProxyServers(): string[] {
     return ACTIVE_PROXIES.map(s => s);
 }
 
+// Removes a proxy server, and calls a fn to notify app servers of it
 export function removeProxyServer(proxyUrl: string): boolean {
     if(!proxyUrl) return;
     console.log("Removing proxyserver " + proxyUrl);
@@ -56,6 +60,7 @@ export function addProxyServer(serverUrl: string){
         console.warn(`Warning! Tried to add proxyserver ${serverUrl} but it was already present`);
         return;
     }
+    // Don't add your own url so you don't try to message yourself
     if(serverUrl === THIS_URL){
         return;
     }
