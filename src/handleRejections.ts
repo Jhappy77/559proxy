@@ -4,7 +4,7 @@ import { removeServer } from "./serverManager";
 
 async function recoverFromAllRejected(serverUrls: string[]){
     console.log('Recovering from all servers being rejected');
-    const promises = serverUrls.map(url => axios.get(`${url}/ping`));
+    const promises = serverUrls.map(url => axios.get(`${url}/ping`, {timeout: 1500}));
     const fulfilled = await Promise.allSettled(promises);
     fulfilled.forEach((res, i) => {
         if(res.status === `rejected`){

@@ -9,11 +9,11 @@ import { getServers, removeServer } from "./serverManager";
 import { resyncBadServers } from "./resyncBadServers";
 import { handleRejections } from "./handleRejections";
 
-function shouldRemoveRejected(result): boolean{
-    console.log(`Failed for ${result.reason}`);
+function shouldRemoveRejected(result, serverUrl: string): boolean{
+    console.log(`AppServer ${serverUrl} failed because ${result.reason}`);
     const {reason} = result;
     if(isAxiosError(reason)){
-        const status = reason.response.status;
+        const status = reason?.response?.status;
         if(status && status > 499 && status < 600){
             console.log(reason.message);
             console.log("Is 500 level error, rejecting");
@@ -37,7 +37,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
         'requestId': uuidv4(),
         'Content-Type': ct,
     }
-    const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
+    const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers, timeout: 2000}))
     sendHandshakes().catch(e => {console.log("Error sending handshakes")});
 
     const results = await Promise.allSettled(promises);
@@ -45,7 +45,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
     const rejectedServers = [];
     results.forEach((element, index) => {
         if(element.status === "rejected"){
-            if(shouldRemoveRejected(element)){
+            if(shouldRemoveRejected(element, servers[index])){
                 const serverUrl = servers[index];
                 rejectedServers.push(serverUrl);
                 return;
@@ -59,8 +59,8 @@ export async function forwardRequest(relativeUrl: string, req: Request){
     
     if(responses.length >= 3){
         console.log('Checking for byzantine errors');
-        // Compares response data (success) or AxiosResponse data (failure)
-        const toCompare = responses.map(r => r?.data ?? r.response.data);
+        // Compares response data (success) or AxiosResponse data (failure) or reason (all else failed)
+        const toCompare = responses.map(r => r?.data ?? r?.response?.data ?? r);
         console.log(toCompare);
         const findMajorityRes = findMajority(toCompare);
         if(findMajorityRes === true) return responses[0]; // All in agreement 
