@@ -28,13 +28,16 @@ export async function forwardRequest(relativeUrl: string, req: Request){
     const servers = getServers();
     const endpointUrls = servers.map(serverUrl => `${serverUrl}${relativeUrl}`);
     console.log(endpointUrls);
+    const reqId = uuidv4();
     incrementLamportTimestamp();
+    const ts = getLamportTimestamp()
     const ct = req.header('content-type');
+    console.log(`Forwarding ${reqId} to appservers with timestamp ${ts}`);
     const headers = {
-        'lamportTimestamp': getLamportTimestamp(),
+        'lamportTimestamp': ts,
         'originUrl': THIS_URL,
         'tob': 1,
-        'requestId': uuidv4(),
+        'requestId': reqId,
         'Content-Type': ct,
     }
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers, timeout: 3000}))

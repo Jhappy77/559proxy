@@ -15,6 +15,7 @@ export async function handshake(){
         'originUrl': THIS_URL,
         'senderId': THIS_PROXY_ID,
     }
+    console.log(`pinging app servers with ${headers}`)
     const promises = endpointUrls.map(url => axios.get(url, {headers}));
     const results = await Promise.allSettled(promises);
     results.forEach((element, index) => {
@@ -36,6 +37,7 @@ export async function sendHandshakes(){
         'senderId': THIS_PROXY_ID,
         'originUrl': THIS_URL,
     }
+    console.log(`Telling proxies to handshake with time=${headers.lamportTimestamp}`)
     const promises = handshakeUrls.map(url => axios.get(url, {headers, timeout: 1500}));
     const results = await Promise.allSettled(promises);
     results.forEach((element, index) => {
