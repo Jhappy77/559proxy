@@ -18,6 +18,7 @@
   "engines": {"node": "18.14.0"},
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon --watch src --exec ts-node src/app.ts"
+    "dev": "nodemon --watch src --exec ts-node src/app.ts",
+    "deploy": "git push proxy1 main && git push proxy2 main"
   }
 }
