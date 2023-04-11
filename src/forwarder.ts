@@ -15,8 +15,8 @@ function shouldRemoveRejected(result): boolean{
     if(isAxiosError(reason)){
         const status = reason.response.status;
         if(status && status > 499 && status < 600){
-            console.log(reason);
-        console.log("Is 500 level error, rejecting");
+            console.log(reason.message);
+            console.log("Is 500 level error, rejecting");
             return true;
         }
         return false;
@@ -38,7 +38,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
         'Content-Type': ct,
     }
     const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers}))
-    sendHandshakes();
+    sendHandshakes().catch(e => {console.log("Error sending handshakes")});
 
     const results = await Promise.allSettled(promises);
     const responses = [];
@@ -55,7 +55,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
             responses.push(element.value); 
         } 
     });
-    handleRejections(servers, rejectedServers);
+    handleRejections(servers, rejectedServers).catch(e => {console.log("error handling rejections")});
     
     if(responses.length >= 3){
         console.log('Checking for byzantine errors');

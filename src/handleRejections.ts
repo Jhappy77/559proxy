@@ -16,12 +16,13 @@ async function recoverFromAllRejected(serverUrls: string[]){
 }
 
 export async function handleRejections(allServers: string[], badServers: string[]){
-    console.log("Handling rejections");
     if(badServers.length === 0) return;
+    console.log("Handling rejections");
     const goodServers = allServers.filter(url => !badServers.includes(url));
+    console.log(`Good servers: ${goodServers}`);
     if(goodServers.length !== 0){
-        resyncBadServers(goodServers, badServers);
+        resyncBadServers(goodServers, badServers).catch(e => {console.error("error resyncing bad servers")});
         return;
     }
-    recoverFromAllRejected(badServers);
+    recoverFromAllRejected(badServers).catch(e => {console.error("error recovering from all rejected")});
 }
