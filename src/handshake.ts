@@ -35,7 +35,7 @@ export async function sendHandshakes(){
         'senderId': THIS_PROXY_ID,
         'originUrl': THIS_URL,
     }
-    const promises = handshakeUrls.map(url => axios.get(url, {headers}));
+    const promises = handshakeUrls.map(url => axios.get(url, {headers, timeout: 1500}));
     const results = await Promise.allSettled(promises);
     results.forEach((element, index) => {
         if(element.status === "rejected"){
