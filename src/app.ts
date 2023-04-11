@@ -2,14 +2,12 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import cors from 'cors';
 import errorMiddleware from './errorMiddleware';
-import { THIS_PROXY_ID } from './env';
+import { PORT, THIS_PROXY_ID } from './env';
 import { initializeRoutes } from './routes';
 import { initializeServerList } from './serverManager';
 import { initializeProxyServerList } from './proxyManager';
 import { logicalTimestampMiddleware } from './logicalTimestampMiddleware';
 import { initialProxyList, initialServerList } from './initialValues';
-
-const PORT = 3005;
 
 console.log(`Initializing proxy with id ${THIS_PROXY_ID}`);
 

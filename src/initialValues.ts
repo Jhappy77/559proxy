@@ -4,5 +4,6 @@ const serverOne = `https://appserver559-1.herokuapp.com`
 export const initialServerList = [serverOne, serverTwo, serverThree];
 
 const proxyOne = 'https://559proxy.vercel.app';
-const proxyTwo = 'https://559proxy-2.vercel.app';
+// const proxyTwo = 'https://559proxy-2.vercel.app';
+const proxyTwo = 'https://proxy2.herokuapp.com';
 export const initialProxyList = [proxyOne, proxyTwo];
