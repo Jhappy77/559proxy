@@ -7,4 +7,4 @@ if(!THIS_URL){
     throw new Error('url is not defined in .env!')
 }
 
-export const PORT = process.env.port || 3005;
+export const PORT = process.env.PORT || 3005;
