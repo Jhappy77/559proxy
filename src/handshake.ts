@@ -40,8 +40,9 @@ export async function sendHandshakes(){
     results.forEach((element, index) => {
         if(element.status === "rejected"){
             const proxyUrl = proxies[index];
+            console.error(element.reason);
             removeProxyServer(proxyUrl);
             return;
-        }
+        } 
     });
 }
