@@ -37,7 +37,7 @@ export async function forwardRequest(relativeUrl: string, req: Request){
         'requestId': uuidv4(),
         'Content-Type': ct,
     }
-    const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers, timeout: 2000}))
+    const promises = endpointUrls.map(url => axios(url, {method: req.method, data: req.body, headers, timeout: 3000}))
     sendHandshakes().catch(e => {console.log("Error sending handshakes")});
 
     const results = await Promise.allSettled(promises);

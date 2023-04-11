@@ -12,6 +12,7 @@ export async function handshake(){
     incrementLamportTimestamp();
     const headers = {
         'lamportTimestamp': getLamportTimestamp(),
+        'originUrl': THIS_URL,
         'senderId': THIS_PROXY_ID,
     }
     const promises = endpointUrls.map(url => axios.get(url, {headers}));

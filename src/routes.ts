@@ -5,6 +5,7 @@ import { isAxiosError } from "axios";
 import { handshake } from "./handshake";
 import { addProxyServer, initializeProxyServerList } from "./proxyManager";
 import { initialProxyList, initialServerList } from "./initialValues";
+import { resetTobs } from "./resetTobs";
 
 export function initializeRoutes(app: Express){
     app.get('/hello', function(req, res){
@@ -41,8 +42,14 @@ export function initializeRoutes(app: Express){
         // For debug purposes
         initializeProxyServerList(initialProxyList);
         initializeServerList(initialServerList);
+        resetTobs().catch(e => console.error(`Error resetting TOBs: ${e}`));
         res.status(200).send('Reset to defaults');
     });
+
+    app.get('/resetConnectedTobs', function(req,res){
+        resetTobs().catch(e => console.error(`Error resetting TOBs: ${e}`));
+        res.status(200).send('Reset TOBs');
+    })
 
     app.get('/err', function(req, res){
         throw new Error('This is an error test!');
